@@ -1,0 +1,1051 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LILA BLACK - Player Journey Visualizer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <style>
+      :root {
+        --bg: #0d0f10;
+        --panel: #14171a;
+        --panel-2: #111417;
+        --border: rgba(255, 255, 255, 0.08);
+        --text: #e8e6e0;
+        --muted: #9aa0a6;
+        --accent: #00ff88;
+        --accent-2: #00cfff;
+        --danger: #ff5a3c;
+        --warning: #ff7a3d;
+        --loot: #ffd166;
+        --storm: #b06eff;
+        --mono: "Space Mono", monospace;
+        --body: "DM Sans", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: var(--body);
+        background: radial-gradient(circle at top left, #11171b, #0b0d0f 55%, #0a0c0e 100%);
+        color: var(--text);
+        min-height: 100vh;
+      }
+
+      .app {
+        display: grid;
+        grid-template-columns: 280px 1fr 260px;
+        grid-template-rows: minmax(0, 1fr) 70px;
+        height: 100vh;
+        gap: 12px;
+        padding: 12px;
+      }
+
+      .panel {
+        background: linear-gradient(180deg, rgba(20, 23, 26, 0.96), rgba(14, 16, 18, 0.96));
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 14px;
+        backdrop-filter: blur(6px);
+      }
+
+      .sidebar {
+        grid-column: 1;
+        grid-row: 1 / span 2;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .stats {
+        grid-column: 3;
+        grid-row: 1 / span 2;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .map-shell {
+        grid-column: 2;
+        grid-row: 1;
+        position: relative;
+        overflow: hidden;
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        background: #0b0e10;
+        z-index: 1;
+        pointer-events: auto;
+        min-height: 0;
+      }
+
+      #map {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        z-index: 0;
+      }
+
+      .leaflet-container {
+        background: #0b0e10;
+      }
+
+      .overlay-canvas {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 400;
+      }
+
+      #pathCanvas {
+        pointer-events: auto;
+      }
+
+      .map-topbar {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        right: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 14px;
+        background: rgba(15, 18, 20, 0.8);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        font-size: 12px;
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+        font-family: var(--mono);
+      }
+
+      .map-topbar span {
+        color: var(--accent);
+      }
+
+      .timeline {
+        grid-column: 2;
+        grid-row: 2;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        padding: 10px 14px;
+        position: relative;
+        z-index: 9999;
+        pointer-events: auto;
+        isolation: isolate;
+      }
+
+      .timeline .panel {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        pointer-events: auto;
+      }
+
+      .timeline button,
+      .timeline select,
+      .timeline input {
+        pointer-events: auto;
+      }
+
+      .title {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+
+      .label {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      select,
+      button,
+      input[type="range"] {
+        font-family: var(--body);
+      }
+
+      select,
+      button {
+        background: #0f1417;
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: 8px 10px;
+        border-radius: 8px;
+        font-size: 13px;
+      }
+
+      select:focus,
+      button:focus,
+      input:focus {
+        outline: 2px solid rgba(0, 255, 136, 0.4);
+        outline-offset: 1px;
+      }
+
+      .toggle-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .toggle input {
+        accent-color: var(--accent);
+      }
+
+      .legend {
+        display: grid;
+        gap: 8px;
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .legend-swatch {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--accent);
+      }
+
+      .legend-icon {
+        width: 16px;
+        height: 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .stat-card {
+        background: #0f1316;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 10px;
+        display: grid;
+        gap: 4px;
+      }
+
+      .stat-value {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--accent);
+      }
+
+      .stat-label {
+        font-size: 11px;
+        color: var(--muted);
+      }
+
+      .event-feed {
+        max-height: 240px;
+        overflow: auto;
+        display: grid;
+        gap: 6px;
+      }
+
+      .event-item {
+        font-size: 12px;
+        color: var(--muted);
+        padding: 6px 8px;
+        border-radius: 6px;
+        background: #101418;
+        border: 1px solid rgba(255, 255, 255, 0.04);
+      }
+
+      .event-item strong {
+        color: var(--text);
+        font-weight: 600;
+      }
+
+      .play-btn {
+        min-width: 90px;
+      }
+
+      .speed-select {
+        min-width: 90px;
+      }
+
+      .timecode {
+        font-family: var(--mono);
+        font-size: 12px;
+        min-width: 70px;
+        text-align: right;
+      }
+
+      #timeline {
+        width: 100%;
+        pointer-events: auto;
+      }
+
+      .tooltip {
+        position: absolute;
+        background: rgba(10, 12, 14, 0.9);
+        border: 1px solid var(--border);
+        padding: 8px 10px;
+        border-radius: 8px;
+        font-size: 12px;
+        color: var(--text);
+        pointer-events: none;
+        transform: translate(-50%, -120%);
+        white-space: nowrap;
+        z-index: 1000;
+        display: none;
+      }
+
+      .badge {
+        font-family: var(--mono);
+        font-size: 10px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      @media (max-width: 1100px) {
+        .app {
+          grid-template-columns: 1fr;
+          grid-template-rows: auto auto auto;
+          height: auto;
+        }
+
+        .sidebar,
+        .stats {
+          grid-column: 1;
+          grid-row: auto;
+        }
+
+        .map-shell {
+          grid-column: 1;
+          min-height: 520px;
+        }
+
+        .timeline {
+          grid-column: 1;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation: none !important;
+          transition: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <aside class="panel sidebar">
+        <div>
+          <div class="label">LILA BLACK</div>
+          <div class="title">Player Journey Visualizer</div>
+          <div class="badge">Map analytics command view</div>
+          <div class="badge" id="statusMessage" style="display:none; color:#ff7a3d; margin-top:6px;"></div>
+        </div>
+
+        <div class="field">
+          <div class="label">Map</div>
+          <select id="mapSelect" aria-label="Select map"></select>
+        </div>
+
+        <div class="field">
+          <div class="label">Date</div>
+          <select id="dateSelect" aria-label="Select date"></select>
+        </div>
+
+        <div class="field">
+          <div class="label">Match</div>
+          <select id="matchSelect" aria-label="Select match"></select>
+        </div>
+
+        <div class="field">
+          <div class="label">Player Type</div>
+          <div class="toggle-row">
+            <label class="toggle"><input type="checkbox" id="showHumans" checked /> Humans</label>
+            <label class="toggle"><input type="checkbox" id="showBots" checked /> Bots</label>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="label">Heatmap</div>
+          <select id="heatmapSelect" aria-label="Heatmap mode">
+            <option value="off">Off</option>
+            <option value="kill">Kill zones</option>
+            <option value="death">Death zones</option>
+            <option value="traffic">Traffic</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <div class="label">Event Types</div>
+          <div class="toggle-row">
+            <label class="toggle"><input type="checkbox" id="evtKill" checked /> Kill</label>
+            <label class="toggle"><input type="checkbox" id="evtDeath" checked /> Death</label>
+            <label class="toggle"><input type="checkbox" id="evtLoot" checked /> Loot</label>
+            <label class="toggle"><input type="checkbox" id="evtStorm" checked /> Storm</label>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="label">Legend</div>
+          <div class="legend">
+            <div class="legend-item"><span class="legend-swatch" style="background: var(--accent)"></span> Human path</div>
+            <div class="legend-item"><span class="legend-swatch" style="background: #5c5c5c"></span> Bot path</div>
+            <div class="legend-item">
+              <span class="legend-icon">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="var(--danger)" stroke-width="2">
+                  <line x1="1" y1="1" x2="11" y2="11" />
+                  <line x1="11" y1="1" x2="1" y2="11" />
+                </svg>
+              </span>
+              Kill
+            </div>
+            <div class="legend-item">
+              <span class="legend-icon">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="var(--warning)" stroke-width="2">
+                  <circle cx="6" cy="6" r="4" />
+                </svg>
+              </span>
+              Death
+            </div>
+            <div class="legend-item">
+              <span class="legend-icon">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="var(--loot)" stroke-width="2">
+                  <polygon points="6,1 11,6 6,11 1,6" />
+                </svg>
+              </span>
+              Loot
+            </div>
+            <div class="legend-item">
+              <span class="legend-icon">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="var(--storm)" stroke-width="2">
+                  <polyline points="6,1 3,6 7,6 5,11" />
+                </svg>
+              </span>
+              Storm death
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="label">Timeline</div>
+          <div class="panel" style="padding: 10px;">
+            <div style="display:flex; gap:10px; align-items:center; margin-bottom:8px;">
+              <button class="play-btn" id="playBtn">Play</button>
+              <select class="speed-select" id="speedSelect" aria-label="Playback speed">
+                <option value="0.5">0.5x</option>
+                <option value="1" selected>1x</option>
+                <option value="2">2x</option>
+                <option value="4">4x</option>
+              </select>
+            </div>
+            <input type="range" id="timeline" min="0" max="1200" value="0" />
+            <div class="timecode" id="timecode" style="margin-top:6px; text-align:left;">00:00</div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="map-shell">
+        <div id="map"></div>
+        <canvas id="heatCanvas" class="overlay-canvas"></canvas>
+        <canvas id="pathCanvas" class="overlay-canvas"></canvas>
+        <div class="tooltip" id="tooltip"></div>
+        <div class="map-topbar">
+          <div>Map: <span id="mapLabel">-</span></div>
+          <div>Date: <span id="dateLabel">-</span></div>
+          <div>Match: <span id="matchLabel">-</span></div>
+        </div>
+      </main>
+
+      <aside class="panel stats">
+        <div>
+          <div class="label">Match Stats</div>
+          <div class="stat-card">
+            <div class="stat-value" id="statPlayers">-</div>
+            <div class="stat-label">Players</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="statKills">-</div>
+            <div class="stat-label">Kills</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="statDeaths">-</div>
+            <div class="stat-label">Deaths</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="statStorm">-</div>
+            <div class="stat-label">Storm deaths</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="label">Live Event Feed</div>
+          <div class="event-feed" id="eventFeed"></div>
+        </div>
+      </aside>
+
+      <!-- Timeline moved to sidebar for guaranteed interaction -->
+    </div>
+
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <script>
+      const WORLD_MIN = -8192;
+      const WORLD_MAX = 8192;
+      const WORLD_RANGE = 16384;
+      const IMG_SIZE = 1024;
+
+      const palette = ["#00ff88", "#00cfff", "#ff5a3c", "#ffd166", "#7dd3fc", "#f472b6"];
+
+      const state = {
+        index: null,
+        match: null,
+        positionsByPlayer: new Map(),
+        playersById: new Map(),
+        currentTime: 0,
+        duration: 0,
+        isPlaying: false,
+        speed: 1,
+        heatmapMode: "off",
+        eventScreenPoints: [],
+        mapConfig: null,
+      };
+
+      const mapSelect = document.getElementById("mapSelect");
+      const dateSelect = document.getElementById("dateSelect");
+      const matchSelect = document.getElementById("matchSelect");
+      const showHumans = document.getElementById("showHumans");
+      const showBots = document.getElementById("showBots");
+      const heatmapSelect = document.getElementById("heatmapSelect");
+      const evtKill = document.getElementById("evtKill");
+      const evtDeath = document.getElementById("evtDeath");
+      const evtLoot = document.getElementById("evtLoot");
+      const evtStorm = document.getElementById("evtStorm");
+      const playBtn = document.getElementById("playBtn");
+      const speedSelect = document.getElementById("speedSelect");
+      const timeline = document.getElementById("timeline");
+      const timecode = document.getElementById("timecode");
+      const mapLabel = document.getElementById("mapLabel");
+      const dateLabel = document.getElementById("dateLabel");
+      const matchLabel = document.getElementById("matchLabel");
+      const statPlayers = document.getElementById("statPlayers");
+      const statKills = document.getElementById("statKills");
+      const statDeaths = document.getElementById("statDeaths");
+      const statStorm = document.getElementById("statStorm");
+      const eventFeed = document.getElementById("eventFeed");
+      const tooltip = document.getElementById("tooltip");
+
+      const heatCanvas = document.getElementById("heatCanvas");
+      const pathCanvas = document.getElementById("pathCanvas");
+      const heatCtx = heatCanvas.getContext("2d");
+      const pathCtx = pathCanvas.getContext("2d");
+
+      const map = L.map("map", {
+        crs: L.CRS.Simple,
+        zoomControl: false,
+        attributionControl: false,
+        minZoom: -2,
+        maxZoom: 2,
+      });
+
+      map.createPane("minimap");
+      map.getPane("minimap").style.zIndex = 200;
+
+      function getBounds() {
+        const size = state.mapConfig?.size || IMG_SIZE;
+        return [
+          [0, 0],
+          [size, size],
+        ];
+      }
+      let imageLayer = null;
+
+      function worldToPixel(wx, wy) {
+        const cfg = state.mapConfig;
+        if (!cfg) {
+          const px = ((wx - WORLD_MIN) / WORLD_RANGE) * IMG_SIZE;
+          const py = (1 - (wy - WORLD_MIN) / WORLD_RANGE) * IMG_SIZE;
+          return { px, py };
+        }
+        const u = (wx - cfg.origin_x) / cfg.scale;
+        const v = (wy - cfg.origin_z) / cfg.scale;
+        const px = u * cfg.size;
+        const py = (1 - v) * cfg.size;
+        return { px, py };
+      }
+
+      function worldToLayerPoint(wx, wy) {
+        const { px, py } = worldToPixel(wx, wy);
+        const latlng = L.latLng(py, px);
+        return map.latLngToLayerPoint(latlng);
+      }
+
+      function resizeCanvases() {
+        const size = map.getSize();
+        [heatCanvas, pathCanvas].forEach((canvas) => {
+          canvas.width = size.x;
+          canvas.height = size.y;
+        });
+      }
+
+      function formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+      }
+
+      function setTopbarLabels(match) {
+        const mapInfo = state.index.maps.find((m) => m.id === match.map);
+        mapLabel.textContent = mapInfo ? mapInfo.name : match.map;
+        dateLabel.textContent = match.date;
+        matchLabel.textContent = match.id;
+      }
+
+      function updateStats() {
+        if (!state.match) return;
+        const kills = state.match.events.filter((e) => e.type === "kill").length;
+        const deaths = state.match.events.filter((e) => e.type === "death").length;
+        const storm = state.match.events.filter((e) => e.type === "storm_death").length;
+        statPlayers.textContent = state.match.players.length;
+        statKills.textContent = kills;
+        statDeaths.textContent = deaths;
+        statStorm.textContent = storm;
+      }
+
+      function updateEventFeed() {
+        if (!state.match) return;
+        const events = state.match.events
+          .filter((e) => e.t <= state.currentTime)
+          .slice(-8)
+          .reverse();
+
+        eventFeed.innerHTML = "";
+        if (events.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "event-item";
+          empty.textContent = "No events yet.";
+          eventFeed.appendChild(empty);
+          return;
+        }
+        events.forEach((evt) => {
+          const item = document.createElement("div");
+          item.className = "event-item";
+          const label = evt.type.replace("_", " ");
+          item.innerHTML = `<strong>${label}</strong> - ${formatTime(evt.t)} - ${evt.player_id}`;
+          eventFeed.appendChild(item);
+        });
+      }
+
+      function updateMatchOptions() {
+        if (!state.index) return;
+        const mapId = mapSelect.value;
+        const date = dateSelect.value;
+        const matches = state.index.matches.filter((m) => (!mapId || m.map === mapId) && (!date || m.date === date));
+        matchSelect.innerHTML = "";
+        matches.forEach((m) => {
+          const opt = document.createElement("option");
+          opt.value = m.id;
+          opt.textContent = `${m.id} (${m.players} players)`;
+          matchSelect.appendChild(opt);
+        });
+        if (matches.length > 0) {
+          matchSelect.value = matches[0].id;
+          loadMatch(matches[0].id);
+        }
+      }
+
+      function assignColors(players) {
+        const map = new Map();
+        players.forEach((p, idx) => {
+          map.set(p.id, palette[idx % palette.length]);
+        });
+        return map;
+      }
+
+      function groupPositions(match) {
+        const byPlayer = new Map();
+        match.players.forEach((p) => byPlayer.set(p.id, []));
+        match.positions.forEach((pos) => {
+          if (!byPlayer.has(pos.player_id)) return;
+          byPlayer.get(pos.player_id).push(pos);
+        });
+        byPlayer.forEach((list) => list.sort((a, b) => a.t - b.t));
+        return byPlayer;
+      }
+
+      function drawHeatmap() {
+        if (!state.match) return;
+        heatCtx.clearRect(0, 0, heatCanvas.width, heatCanvas.height);
+        if (state.heatmapMode === "off") return;
+
+        let points = [];
+        if (state.heatmapMode === "traffic") {
+          points = state.match.positions.filter((p) => p.t % 3 === 0);
+        } else if (state.heatmapMode === "kill") {
+          points = state.match.events.filter((e) => e.type === "kill");
+        } else if (state.heatmapMode === "death") {
+          points = state.match.events.filter((e) => e.type === "death" || e.type === "storm_death");
+        }
+
+        const color =
+          state.heatmapMode === "kill" ? "255,90,60" : state.heatmapMode === "death" ? "255,122,61" : "176,110,255";
+
+        heatCtx.globalCompositeOperation = "lighter";
+        points.forEach((pt) => {
+          const point = worldToLayerPoint(pt.x, pt.y);
+          const grad = heatCtx.createRadialGradient(point.x, point.y, 0, point.x, point.y, 40);
+          grad.addColorStop(0, `rgba(${color},0.35)`);
+          grad.addColorStop(1, "rgba(0,0,0,0)");
+          heatCtx.fillStyle = grad;
+          heatCtx.beginPath();
+          heatCtx.arc(point.x, point.y, 40, 0, Math.PI * 2);
+          heatCtx.fill();
+        });
+        heatCtx.globalCompositeOperation = "source-over";
+      }
+
+      function drawEvents() {
+        const showKill = evtKill.checked;
+        const showDeath = evtDeath.checked;
+        const showLoot = evtLoot.checked;
+        const showStorm = evtStorm.checked;
+
+        state.eventScreenPoints = [];
+        const events = state.match.events.filter((e) => e.t <= state.currentTime);
+        events.forEach((evt) => {
+          if (evt.type === "kill" && !showKill) return;
+          if (evt.type === "death" && !showDeath) return;
+          if (evt.type === "loot" && !showLoot) return;
+          if (evt.type === "storm_death" && !showStorm) return;
+
+          const p = worldToLayerPoint(evt.x, evt.y);
+          state.eventScreenPoints.push({ x: p.x, y: p.y, event: evt });
+
+          pathCtx.save();
+          pathCtx.translate(p.x, p.y);
+          pathCtx.lineWidth = 2;
+          if (evt.type === "kill") {
+            pathCtx.strokeStyle = "#ff5a3c";
+            pathCtx.beginPath();
+            pathCtx.moveTo(-6, -6);
+            pathCtx.lineTo(6, 6);
+            pathCtx.moveTo(6, -6);
+            pathCtx.lineTo(-6, 6);
+            pathCtx.stroke();
+          } else if (evt.type === "death") {
+            pathCtx.strokeStyle = "#ff7a3d";
+            pathCtx.beginPath();
+            pathCtx.arc(0, 0, 5, 0, Math.PI * 2);
+            pathCtx.stroke();
+          } else if (evt.type === "loot") {
+            pathCtx.strokeStyle = "#ffd166";
+            pathCtx.beginPath();
+            pathCtx.moveTo(0, -6);
+            pathCtx.lineTo(6, 0);
+            pathCtx.lineTo(0, 6);
+            pathCtx.lineTo(-6, 0);
+            pathCtx.closePath();
+            pathCtx.stroke();
+          } else if (evt.type === "storm_death") {
+            pathCtx.strokeStyle = "#b06eff";
+            pathCtx.beginPath();
+            pathCtx.moveTo(0, -6);
+            pathCtx.lineTo(-4, 0);
+            pathCtx.lineTo(2, 0);
+            pathCtx.lineTo(-2, 6);
+            pathCtx.stroke();
+          }
+          pathCtx.restore();
+        });
+      }
+
+      function drawPaths() {
+        pathCtx.clearRect(0, 0, pathCanvas.width, pathCanvas.height);
+        if (!state.match) return;
+
+        const colors = assignColors(state.match.players);
+        const showHuman = showHumans.checked;
+        const showBot = showBots.checked;
+
+        state.match.players.forEach((player) => {
+          if (player.is_bot && !showBot) return;
+          if (!player.is_bot && !showHuman) return;
+          const positions = state.positionsByPlayer.get(player.id) || [];
+          const visible = positions.filter((p) => p.t <= state.currentTime);
+          if (visible.length < 2) return;
+
+          pathCtx.beginPath();
+          visible.forEach((pos, idx) => {
+            const pt = worldToLayerPoint(pos.x, pos.y);
+            if (idx === 0) pathCtx.moveTo(pt.x, pt.y);
+            else pathCtx.lineTo(pt.x, pt.y);
+          });
+          pathCtx.lineWidth = 2;
+          if (player.is_bot) {
+            pathCtx.strokeStyle = "#5c5c5c";
+            pathCtx.setLineDash([6, 6]);
+          } else {
+            pathCtx.strokeStyle = colors.get(player.id);
+            pathCtx.setLineDash([]);
+          }
+          pathCtx.stroke();
+
+          const last = visible[visible.length - 1];
+          const lp = worldToLayerPoint(last.x, last.y);
+          pathCtx.beginPath();
+          pathCtx.fillStyle = player.is_bot ? "#5c5c5c" : colors.get(player.id);
+          pathCtx.strokeStyle = player.is_bot ? "#c2c2c2" : colors.get(player.id);
+          if (player.is_bot) {
+            pathCtx.arc(lp.x, lp.y, 4, 0, Math.PI * 2);
+            pathCtx.stroke();
+          } else {
+            pathCtx.arc(lp.x, lp.y, 4, 0, Math.PI * 2);
+            pathCtx.fill();
+          }
+        });
+
+        drawEvents();
+      }
+
+      function redrawAll() {
+        resizeCanvases();
+        drawHeatmap();
+        drawPaths();
+      }
+
+      function loadMatch(matchId) {
+        fetch(`data/matches/${matchId}.json`)
+          .then((res) => res.json())
+          .then((match) => {
+            state.match = match;
+            state.positionsByPlayer = groupPositions(match);
+            state.currentTime = 0;
+            state.duration = match.duration;
+            timeline.max = match.duration;
+            timeline.value = 0;
+            timecode.textContent = formatTime(0);
+            updateStats();
+            updateEventFeed();
+            setTopbarLabels(match);
+
+            const mapInfo = state.index.maps.find((m) => m.id === match.map);
+            state.mapConfig = mapInfo || null;
+            if (imageLayer) {
+              map.removeLayer(imageLayer);
+            }
+            const bounds = getBounds();
+            imageLayer = L.imageOverlay(mapInfo.minimap, bounds, { pane: "minimap" }).addTo(map);
+            map.invalidateSize();
+            map.fitBounds(bounds, { padding: [20, 20] });
+            const zoom = map.getBoundsZoom(bounds);
+            map.setMinZoom(zoom);
+            map.setMaxBounds(bounds);
+            redrawAll();
+          })
+          .catch((err) => console.error("Match load failed", err));
+      }
+
+      function loadIndex() {
+        const tryFetch = (url) =>
+          fetch(url, { cache: "no-store" }).then((res) => {
+            if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
+            return res.json();
+          });
+
+        tryFetch("data/index.json")
+          .catch(() => tryFetch("/data/index.json"))
+          .then((index) => {
+            state.index = index;
+            mapSelect.innerHTML = "<option value=\"\">All maps</option>";
+            index.maps.forEach((m) => {
+              const opt = document.createElement("option");
+              opt.value = m.id;
+              opt.textContent = m.name;
+              mapSelect.appendChild(opt);
+            });
+
+            dateSelect.innerHTML = "<option value=\"\">All dates</option>";
+            index.dates.forEach((d) => {
+              const opt = document.createElement("option");
+              opt.value = d;
+              opt.textContent = d;
+              dateSelect.appendChild(opt);
+            });
+
+            updateMatchOptions();
+          })
+          .catch((err) => {
+            console.error("Index load failed", err);
+            const status = document.getElementById("statusMessage");
+            if (status) {
+              status.style.display = "block";
+              status.textContent = "Data load failed. Check if /data/index.json is present in Netlify deploy.";
+            }
+          });
+      }
+
+      function tick(timestamp) {
+        if (!state.isPlaying) return;
+        if (!state.lastTimestamp) state.lastTimestamp = timestamp;
+        const dt = (timestamp - state.lastTimestamp) / 1000;
+        state.lastTimestamp = timestamp;
+        state.currentTime = Math.min(state.currentTime + dt * state.speed, state.duration);
+        timeline.value = state.currentTime;
+        timecode.textContent = formatTime(state.currentTime);
+        drawPaths();
+        updateEventFeed();
+        if (state.currentTime >= state.duration) {
+          state.isPlaying = false;
+          playBtn.textContent = "Play";
+          state.lastTimestamp = null;
+          return;
+        }
+        requestAnimationFrame(tick);
+      }
+
+      playBtn.addEventListener("click", () => {
+        state.isPlaying = !state.isPlaying;
+        playBtn.textContent = state.isPlaying ? "Pause" : "Play";
+        if (state.isPlaying) {
+          state.lastTimestamp = null;
+          requestAnimationFrame(tick);
+        }
+      });
+
+      speedSelect.addEventListener("change", (e) => {
+        state.speed = parseFloat(e.target.value);
+      });
+
+      timeline.addEventListener("input", (e) => {
+        state.currentTime = parseFloat(e.target.value);
+        timecode.textContent = formatTime(state.currentTime);
+        drawPaths();
+        updateEventFeed();
+      });
+
+      // Hard fallback: capture timeline pointer events even if an overlay blocks them.
+      let timelineDragging = false;
+      function setTimelineFromClientX(clientX) {
+        const rect = timeline.getBoundingClientRect();
+        const clamped = Math.min(rect.right, Math.max(rect.left, clientX));
+        const ratio = (clamped - rect.left) / rect.width;
+        const value = ratio * (parseFloat(timeline.max) || 0);
+        timeline.value = value;
+        timeline.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+
+      window.addEventListener(
+        "pointerdown",
+        (e) => {
+          const rect = timeline.getBoundingClientRect();
+          if (e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom) {
+            timelineDragging = true;
+            setTimelineFromClientX(e.clientX);
+            e.preventDefault();
+          }
+        },
+        true
+      );
+      window.addEventListener(
+        "pointermove",
+        (e) => {
+          if (!timelineDragging) return;
+          setTimelineFromClientX(e.clientX);
+          e.preventDefault();
+        },
+        true
+      );
+      window.addEventListener(
+        "pointerup",
+        () => {
+          timelineDragging = false;
+        },
+        true
+      );
+
+      [mapSelect, dateSelect].forEach((el) =>
+        el.addEventListener("change", () => {
+          updateMatchOptions();
+        })
+      );
+
+      matchSelect.addEventListener("change", () => loadMatch(matchSelect.value));
+      [showHumans, showBots, evtKill, evtDeath, evtLoot, evtStorm].forEach((el) =>
+        el.addEventListener("change", () => drawPaths())
+      );
+
+      heatmapSelect.addEventListener("change", (e) => {
+        state.heatmapMode = e.target.value;
+        drawHeatmap();
+      });
+
+      map.on("move zoom", () => {
+        resizeCanvases();
+        drawHeatmap();
+        drawPaths();
+      });
+
+      pathCanvas.addEventListener("mousemove", (e) => {
+        const rect = pathCanvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const hit = state.eventScreenPoints.find((p) => {
+          const dx = p.x - x;
+          const dy = p.y - y;
+          return dx * dx + dy * dy <= 64;
+        });
+        if (hit) {
+          const evt = hit.event;
+          tooltip.style.display = "block";
+          tooltip.style.left = `${hit.x}px`;
+          tooltip.style.top = `${hit.y}px`;
+          tooltip.textContent = `${evt.type.replace("_", " ")} - ${evt.player_id} - ${formatTime(evt.t)}`;
+        } else {
+          tooltip.style.display = "none";
+        }
+      });
+
+      pathCanvas.addEventListener("mouseleave", () => {
+        tooltip.style.display = "none";
+      });
+
+      loadIndex();
+    </script>
+</body>
+</html>

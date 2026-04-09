@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="water" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0d1a1c"/>
+      <stop offset="100%" stop-color="#101f22"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#water)"/>
+  <ellipse cx="340" cy="420" rx="300" ry="210" fill="#142116" opacity="0.95"/>
+  <ellipse cx="700" cy="600" rx="240" ry="190" fill="#142116" opacity="0.95"/>
+  <ellipse cx="200" cy="720" rx="160" ry="140" fill="#142116" opacity="0.9"/>
+  <ellipse cx="760" cy="250" rx="140" ry="110" fill="#142116" opacity="0.85"/>
+  <path d="M 0 520 Q 220 480 360 500 Q 520 530 700 520 Q 860 510 1024 530" fill="none" stroke="#0b1821" stroke-width="20" opacity="0.6"/>
+  <path d="M 512 0 Q 530 240 510 360 Q 490 520 512 680 Q 530 840 512 1024" fill="none" stroke="#0b1821" stroke-width="20" opacity="0.6"/>
+  <path d="M 100 120 Q 240 260 320 380 Q 420 500 520 620" fill="none" stroke="#0b1821" stroke-width="12" opacity="0.45"/>
+  <path d="M 900 120 Q 800 280 740 420 Q 680 540 620 640" fill="none" stroke="#0b1821" stroke-width="12" opacity="0.45"/>
+  <circle cx="140" cy="200" r="26" fill="#1b2b1a" opacity="0.8"/>
+  <circle cx="360" cy="260" r="30" fill="#1b2b1a" opacity="0.8"/>
+  <circle cx="620" cy="200" r="22" fill="#1b2b1a" opacity="0.8"/>
+  <circle cx="200" cy="560" r="28" fill="#1b2b1a" opacity="0.8"/>
+  <circle cx="460" cy="720" r="24" fill="#1b2b1a" opacity="0.8"/>
+  <circle cx="690" cy="460" r="26" fill="#1b2b1a" opacity="0.8"/>
+  <circle cx="830" cy="360" r="22" fill="#1b2b1a" opacity="0.8"/>
+  <rect x="470" y="520" width="70" height="40" rx="6" fill="#1a2018"/>
+  <rect x="680" y="760" width="80" height="50" rx="6" fill="#1a2018"/>
+  <rect x="260" y="820" width="70" height="40" rx="6" fill="#1a2018"/>
+  <g opacity="0.04" stroke="#ffffff" stroke-width="0.5">
+    <line x1="0" y1="128" x2="1024" y2="128"/>
+    <line x1="0" y1="256" x2="1024" y2="256"/>
+    <line x1="0" y1="384" x2="1024" y2="384"/>
+    <line x1="0" y1="640" x2="1024" y2="640"/>
+    <line x1="0" y1="768" x2="1024" y2="768"/>
+    <line x1="128" y1="0" x2="128" y2="1024"/>
+    <line x1="256" y1="0" x2="256" y2="1024"/>
+    <line x1="384" y1="0" x2="384" y2="1024"/>
+    <line x1="640" y1="0" x2="640" y2="1024"/>
+    <line x1="768" y1="0" x2="768" y2="1024"/>
+  </g>
+  <text x="512" y="32" text-anchor="middle" fill="#2a3828" font-size="14" font-family="monospace" opacity="0.7">SUNDARBANS DELTA</text>
+</svg>

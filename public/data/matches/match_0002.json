@@ -1,0 +1,53 @@
+{
+  "id": "match_0002",
+  "map": "craters_edge",
+  "date": "2026-04-06",
+  "duration": 1350,
+  "players": [
+    {"id": "P3", "is_bot": false, "name": "Maya"},
+    {"id": "P4", "is_bot": false, "name": "Vikram"},
+    {"id": "P5", "is_bot": false, "name": "Zara"},
+    {"id": "B3", "is_bot": true, "name": "Bot-09"},
+    {"id": "B4", "is_bot": true, "name": "Bot-11"}
+  ],
+  "positions": [
+    {"t": 0, "player_id": "P3", "x": -2200, "y": 2600},
+    {"t": 350, "player_id": "P3", "x": -900, "y": 1600},
+    {"t": 700, "player_id": "P3", "x": 200, "y": 800},
+    {"t": 1050, "player_id": "P3", "x": 900, "y": -200},
+    {"t": 1350, "player_id": "P3", "x": 1400, "y": -900},
+
+    {"t": 0, "player_id": "P4", "x": 1800, "y": 2600},
+    {"t": 350, "player_id": "P4", "x": 900, "y": 1400},
+    {"t": 700, "player_id": "P4", "x": 200, "y": 500},
+    {"t": 1050, "player_id": "P4", "x": -300, "y": -300},
+    {"t": 1350, "player_id": "P4", "x": -900, "y": -1200},
+
+    {"t": 0, "player_id": "P5", "x": 600, "y": -2400},
+    {"t": 350, "player_id": "P5", "x": 200, "y": -1400},
+    {"t": 700, "player_id": "P5", "x": -200, "y": -600},
+    {"t": 1050, "player_id": "P5", "x": -600, "y": 200},
+    {"t": 1350, "player_id": "P5", "x": -900, "y": 900},
+
+    {"t": 0, "player_id": "B3", "x": -3600, "y": -2800},
+    {"t": 350, "player_id": "B3", "x": -2600, "y": -2000},
+    {"t": 700, "player_id": "B3", "x": -1400, "y": -1100},
+    {"t": 1050, "player_id": "B3", "x": -700, "y": -200},
+    {"t": 1350, "player_id": "B3", "x": -200, "y": 400},
+
+    {"t": 0, "player_id": "B4", "x": 3600, "y": -2000},
+    {"t": 350, "player_id": "B4", "x": 2600, "y": -1400},
+    {"t": 700, "player_id": "B4", "x": 1700, "y": -600},
+    {"t": 1050, "player_id": "B4", "x": 1100, "y": 300},
+    {"t": 1350, "player_id": "B4", "x": 600, "y": 900}
+  ],
+  "events": [
+    {"t": 260, "type": "loot", "x": -3000, "y": 2000, "player_id": "P3"},
+    {"t": 520, "type": "kill", "x": 200, "y": 500, "player_id": "P4", "target_id": "B3", "weapon": "Shotgun"},
+    {"t": 521, "type": "death", "x": 200, "y": 500, "player_id": "B3", "killer_id": "P4"},
+    {"t": 760, "type": "loot", "x": 900, "y": 300, "player_id": "P5"},
+    {"t": 980, "type": "kill", "x": -500, "y": -200, "player_id": "P3", "target_id": "P5", "weapon": "Rifle"},
+    {"t": 981, "type": "death", "x": -500, "y": -200, "player_id": "P5", "killer_id": "P3"},
+    {"t": 1220, "type": "storm_death", "x": -1200, "y": -1600, "player_id": "B4"}
+  ]
+}

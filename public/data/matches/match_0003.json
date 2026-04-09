@@ -1,0 +1,45 @@
+{
+  "id": "match_0003",
+  "map": "sundarbans",
+  "date": "2026-04-07",
+  "duration": 1100,
+  "players": [
+    {"id": "P6", "is_bot": false, "name": "Neel"},
+    {"id": "P7", "is_bot": false, "name": "Sia"},
+    {"id": "B5", "is_bot": true, "name": "Bot-03"},
+    {"id": "B6", "is_bot": true, "name": "Bot-05"}
+  ],
+  "positions": [
+    {"t": 0, "player_id": "P6", "x": -4200, "y": 3000},
+    {"t": 275, "player_id": "P6", "x": -2800, "y": 2200},
+    {"t": 550, "player_id": "P6", "x": -1500, "y": 1200},
+    {"t": 825, "player_id": "P6", "x": -300, "y": 200},
+    {"t": 1100, "player_id": "P6", "x": 700, "y": -600},
+
+    {"t": 0, "player_id": "P7", "x": 800, "y": 1800},
+    {"t": 275, "player_id": "P7", "x": 400, "y": 900},
+    {"t": 550, "player_id": "P7", "x": -200, "y": 200},
+    {"t": 825, "player_id": "P7", "x": -800, "y": -500},
+    {"t": 1100, "player_id": "P7", "x": -1300, "y": -1200},
+
+    {"t": 0, "player_id": "B5", "x": 3200, "y": 3000},
+    {"t": 275, "player_id": "B5", "x": 2200, "y": 2000},
+    {"t": 550, "player_id": "B5", "x": 1400, "y": 1200},
+    {"t": 825, "player_id": "B5", "x": 600, "y": 500},
+    {"t": 1100, "player_id": "B5", "x": 200, "y": 200},
+
+    {"t": 0, "player_id": "B6", "x": -2000, "y": -3400},
+    {"t": 275, "player_id": "B6", "x": -1600, "y": -2400},
+    {"t": 550, "player_id": "B6", "x": -1200, "y": -1600},
+    {"t": 825, "player_id": "B6", "x": -800, "y": -800},
+    {"t": 1100, "player_id": "B6", "x": -400, "y": -200}
+  ],
+  "events": [
+    {"t": 180, "type": "loot", "x": -3800, "y": 2600, "player_id": "P6"},
+    {"t": 420, "type": "kill", "x": 300, "y": 700, "player_id": "P7", "target_id": "B5", "weapon": "Rifle"},
+    {"t": 421, "type": "death", "x": 300, "y": 700, "player_id": "B5", "killer_id": "P7"},
+    {"t": 700, "type": "loot", "x": -200, "y": 200, "player_id": "P7"},
+    {"t": 940, "type": "kill", "x": -700, "y": -500, "player_id": "P6", "target_id": "B6", "weapon": "SMG"},
+    {"t": 941, "type": "death", "x": -700, "y": -500, "player_id": "B6", "killer_id": "P6"}
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "id": "85f53074-77ee-4b30-b5e4-68fe107e054f.nakama-0",
+  "map": "AmbroseValley",
+  "date": "2026-02-10",
+  "duration": 0,
+  "players": [
+    {
+      "id": "94d042cb-a0f2-45f3-bdca-42fab73cfef5",
+      "is_bot": false,
+      "name": "94d042cb-a0f2-45f3-bdca-42fab73cfef5"
+    }
+  ],
+  "positions": [
+    {
+      "t": 0.0,
+      "player_id": "94d042cb-a0f2-45f3-bdca-42fab73cfef5",
+      "x": -104.2814712524414,
+      "y": -365.6881103515625
+    }
+  ],
+  "events": [
+    {
+      "t": 0.013,
+      "type": "death",
+      "x": -104.2814712524414,
+      "y": -365.6881103515625,
+      "player_id": "94d042cb-a0f2-45f3-bdca-42fab73cfef5"
+    }
+  ]
+}

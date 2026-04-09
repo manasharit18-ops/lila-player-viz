@@ -1,0 +1,45 @@
+{
+  "id": "match_0001",
+  "map": "ashveld",
+  "date": "2026-04-05",
+  "duration": 1200,
+  "players": [
+    {"id": "P1", "is_bot": false, "name": "Rhea"},
+    {"id": "P2", "is_bot": false, "name": "Arjun"},
+    {"id": "B1", "is_bot": true, "name": "Bot-17"},
+    {"id": "B2", "is_bot": true, "name": "Bot-22"}
+  ],
+  "positions": [
+    {"t": 0, "player_id": "P1", "x": -1200, "y": 800},
+    {"t": 300, "player_id": "P1", "x": -400, "y": 1200},
+    {"t": 600, "player_id": "P1", "x": 900, "y": 600},
+    {"t": 900, "player_id": "P1", "x": 1400, "y": -200},
+    {"t": 1200, "player_id": "P1", "x": 700, "y": -1200},
+
+    {"t": 0, "player_id": "P2", "x": 900, "y": 1400},
+    {"t": 300, "player_id": "P2", "x": 400, "y": 900},
+    {"t": 600, "player_id": "P2", "x": -300, "y": 200},
+    {"t": 900, "player_id": "P2", "x": -900, "y": -700},
+    {"t": 1200, "player_id": "P2", "x": -1600, "y": -1400},
+
+    {"t": 0, "player_id": "B1", "x": -3200, "y": -2800},
+    {"t": 300, "player_id": "B1", "x": -2400, "y": -2000},
+    {"t": 600, "player_id": "B1", "x": -1800, "y": -1200},
+    {"t": 900, "player_id": "B1", "x": -900, "y": -600},
+    {"t": 1200, "player_id": "B1", "x": -400, "y": -300},
+
+    {"t": 0, "player_id": "B2", "x": 2400, "y": -2600},
+    {"t": 300, "player_id": "B2", "x": 1800, "y": -1800},
+    {"t": 600, "player_id": "B2", "x": 1200, "y": -900},
+    {"t": 900, "player_id": "B2", "x": 400, "y": -300},
+    {"t": 1200, "player_id": "B2", "x": -200, "y": 200}
+  ],
+  "events": [
+    {"t": 210, "type": "loot", "x": -600, "y": 1000, "player_id": "P1"},
+    {"t": 430, "type": "kill", "x": -500, "y": 300, "player_id": "P2", "target_id": "B1", "weapon": "Rifle"},
+    {"t": 431, "type": "death", "x": -500, "y": 300, "player_id": "B1", "killer_id": "P2"},
+    {"t": 700, "type": "loot", "x": 1200, "y": 500, "player_id": "P1"},
+    {"t": 980, "type": "kill", "x": 200, "y": -400, "player_id": "P1", "target_id": "B2", "weapon": "SMG"},
+    {"t": 1180, "type": "storm_death", "x": -1700, "y": -1500, "player_id": "P2"}
+  ]
+}
